@@ -30,7 +30,7 @@ h6 {
 	login window
 */
 #login {
-  width: 380px;
+  width: 800px;
 }
 #login .btn {
   float: left;
@@ -73,17 +73,18 @@ h6 {
   font-size: 0.8rem;
   margin: 2px 0 0 0;
 }
-#login .btm-links #forgot-password {
-  float: left;
-  margin-left: 16px;
-}
 #login .btm-links #create-account {
   float: right;
   margin-right: 20px;
 }
+#account-form-container .btn {
+  float: left;
+  width: 48%;
+  font-size: 0.8rem;
+}
 #account-form-container label {
-  text-align: right;
-  margin-top: 2px;
+  text-align: left;
+  margin-top: 5px;
 }
 #account-form-container input,
 #account-form-container select {
@@ -102,6 +103,7 @@ h6 {
 }
 #account-form-container .form-buttons>:not(:last-child) {
   margin-right: 0.5rem;
+n
 }
 /*
 	modal windows
@@ -128,7 +130,17 @@ h6 {
 .modal .modal-footer button {
   width: 80px;
 }
+.left-vertical {
+  width: 880px;
+  top: 50%;
+  left: 50%;
+  position: left;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
 .center-vertical {
+  width: 880px;
   top: 50%;
   left: 50%;
   position: absolute;

@@ -203,10 +203,3 @@ var getObjectId = function(id)
 	return new require('mongodb').ObjectID(id);
 }
 
-var listIndexes = function()
-{
-	accounts.indexes(null, function(e, indexes){
-		for (var i = 0; i < indexes.length; i++) console.log('index:', i, indexes[i]);
-	});
-}
-

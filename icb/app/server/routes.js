@@ -45,10 +45,11 @@ module.exports = function(app) {
 		});
 	});
 
-	app.post('/logout', function(req, res){
+	app.post('/logout', function(req, res)
+	{
 		res.clearCookie('login');
 		req.session.destroy(function(e){ res.status(200).send('ok'); });
-	})
+	});
 	
 /*
 	control panel

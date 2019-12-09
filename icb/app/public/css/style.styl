@@ -18,7 +18,7 @@ body{
 
 h2{
 	margin: 0 0 6px 0;
-	font-weight: bold; 
+	font-weight: bold;
 }
 
 hr{
@@ -43,7 +43,7 @@ label, h6 {
 */
 
 #login{
-	width: 380px;
+	width: 800px;
 	.btn{
 		float: left;
 		width: 48%;
@@ -90,9 +90,14 @@ label, h6 {
 }
 
 #account-form-container{
+	.btn{
+		float: left;
+		width: 48%;
+		font-size: .8rem;
+	}
 	label{
-		text-align right;
-		margin-top 2px;
+		text-align left;
+		margin-top 5px;
 	}
 	input, select{
 		font-size: .875rem;
@@ -110,7 +115,7 @@ label, h6 {
 	}
 	.form-buttons>:not(:last-child)
 	{
-		margin-right: .5rem;
+		margin-right: .5rem;n
 	}
 }
 
@@ -144,7 +149,18 @@ label, h6 {
 	}
 }
 
+.left-vertical
+{
+	width: 880px;
+	top 50%; left 50%
+	position: left;
+	-webkit-transform: translate(-50%, -50%);
+	-ms-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+}
+
 .center-vertical{
+	width: 880px;
 	top 50%; left 50%
 	position: absolute;
 	-webkit-transform: translate(-50%, -50%);
