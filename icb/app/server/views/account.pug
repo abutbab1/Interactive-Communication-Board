@@ -1,0 +1,52 @@
+
+// preset form values if we receive a userdata object //
+- user = typeof(udata) != 'undefined' ? udata : { }
+// store the userId on the client side in a hidden input field //
+input(type='hidden', value= user._id)#userId
+
+#account-form-container.center-vertical
+	form.card.card-body.bg-light(method='post')#account-form
+		h2
+		h6#sub Please tell us a little about yourself.
+		hr
+		.form-group.row
+			label.col-sm-2.col-form-label.col-form-label-sm Full Name
+			.col-sm-10
+				input.form-control#name-tf(type='text', name='name', value= user.name)
+
+		.form-group.row
+			label.col-sm-2.col-form-label.col-form-label-sm E-mail
+			.col-sm-10
+				input.form-control#email-tf(type='email', name='email', value= user.email)
+
+		.form-group.row
+			label.col-sm-2.col-form-label.col-form-label-sm Classification
+			.col-sm-10
+				select.custom-select#class-list(name='classf')
+					each item in classification
+						option(selected=item.name == user.classf)= item.name
+		.form-group.row
+			label.col-sm-2.col-form-label.col-form-label-sm Username
+			.col-sm-10
+				input.form-control#user-tf(type='text', name='user', value= user.user).disabled
+
+		.form-group.row
+			label.col-sm-2.col-form-label.col-form-label-sm Password
+			.col-sm-10
+				input.form-control#pass-tf(type='password', name='pass', value='')
+
+		.form-group.row
+			label.col-sm-2.col-form-label.col-form-label-sm Confirm Password
+			.col-sm-10
+				input.form-control#pass-cn(type='password', name='passcn', value='')
+
+
+		hr
+		.form-buttons
+			button(type='button')#account-form-btn1.btn.btn-outline-dark
+			button(type='submit')#account-form-btn2.btn.btn-primary
+
+
+// display form errors in a custom modal window //
+
+include modals/form-errors
