@@ -87,7 +87,7 @@ AccountValidator.prototype.validateForm = function()
 	}
 	if (this.validatePasswords(this.formFields[3].val() == false , this.formFields[4].val() == false)) {
 		this.controlGroups[4].addClass('error');
-		e.push('Password does not match');
+		e.push('Password Does Not Match');
 	}
 	if (e.length) this.showErrors(e);
 	return e.length === 0;

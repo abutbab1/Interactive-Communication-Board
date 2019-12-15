@@ -27,7 +27,7 @@ $(document).ready(function(){
 	$('#account-form #sub').text('Please tell us a little about yourself');
 	$('#account-form-btn1').html('Cancel');
 	$('#account-form-btn2').html('Submit');
-	$('#account-form-btn2').addClass('btn-primary');
+	//$('#account-form-btn2').addClass('btn-primary');
 	
 // setup the alert that displays when an account is successfully created //
 

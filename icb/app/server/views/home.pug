@@ -2,16 +2,25 @@
 extends layout
 
 block content
-	nav.navbar.navbar-expand.navbar-light.bg-light
-		.nav-item
-			.navbar-brand Control Panel
-		.navbar-nav.ml-auto
+	- user = typeof(udata) != 'undefined' ? udata : { }
+	if(user.classf == "Speech Therapist")
+		nav.navbar.navbar-expand.navbar-light.bg-light
 			.nav-item
-				button.btn.navbar-btn.btn-outline-dark#btn-logout Sign Out
-
+				.navbar-brand Control Panel
+				button.btn.navbar-btn.btn-outline-dark#btn-add ADD
+			.navbar-nav.ml-auto
+				.nav-item
+					button.btn.navbar-btn.btn-outline-dark#btn-logout Sign Out
+	else
+		nav.navbar.navbar-expand.navbar-light.bg-light
+			.nav-item
+				.navbar-brand Control Panel
+			.navbar-nav.ml-auto
+				.nav-item
+					button.btn.navbar-btn.btn-outline-dark#btn-logout Sign Out
 	include account
-	include modals/alert
 	include modals/logout
+	include modals/alert
 	include modals/confirm
 
 block scripts
