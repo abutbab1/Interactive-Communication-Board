@@ -11,11 +11,12 @@ class Person {
 
 public:
 	// constructor
+	Person(){}
 	Person(string Name, long ID, int Age) : name(Name), id(ID), age(Age)
 	{}
 		
 	//cout operator
-	friend ostream& operator << (ostream& out, const Person& p);
+	friend ostream& operator << (ostream& out, Person const& p);
 
 };
 
