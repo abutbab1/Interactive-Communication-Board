@@ -1,0 +1,81 @@
+extends layout
+
+block content
+
+    // preset form values if we receive a userdata object //
+    - user = typeof(udata) != 'undefined' ? udata : { }
+    // store the userId on the client side in a hidden input field //
+    input(type='hidden', value= user._id)#userId
+
+    meta(name='viewport' content='user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1')
+    script(src='https://kit.fontawesome.com/a076d05399.js')
+    link(rel='stylesheet' href='https://www.w3schools.com/w3css/4/w3.css')
+    link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
+    link(href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet')
+    link(rel='stylesheet' type='text/css' href='https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
+
+    nav
+        a#resp-menu.responsive-menu(href='#')
+            i.fa.fa-reorder
+            |  Menu
+        ul.menu
+            li
+                a.homer(href='/home')
+                    i.fa.fa-home
+                    |  HOME
+            if(user.classf == "Speech Therapist")
+                li
+                    a(href='#')
+                        i.fa.fa-users
+                        |  Users
+                    ul.sub-menu
+                        li
+                            a(href='/addsubuser')
+                                i.fa.fa-user-plus
+                                |  Add user
+            li
+                a(href='/addtile')
+                    i.far.fa-plus-square
+                    |  Add Tile
+            li
+                a(href='/addcategory')
+                    i.fa.fa-sitemap
+                    |  Add Category
+            div.right-items
+                li
+                    a(href='#')=user.name
+                    ul.sub-menu
+                        li
+                            a(href='/edituser')
+                                i.far.fa-address-card
+                                |  Edit User
+                        li
+                            a(href='#')#btn-logout
+                                i.fa.fa-sign-out
+                                |  Logout
+
+    div.container(style='margin:20px auto')
+        table.table.table-bordered.table-striped
+            thead.thead-dark
+                tr
+                    th(style='width:50px;text-align:center') #
+                    th(style='width:220px') Name
+                    th(style='width:220px') Username
+                    th(style='width:240px') Email
+                    th Account Created
+            tbody
+            - for (var i = 0, j=0; i < accts.length; i++)
+                tr
+                    if(accts[i].SpeechTherapist == user._id)
+                        td(style='text-align:center')= j = j + 1
+                        td= accts[i].name
+                        td= accts[i].user
+                        td= accts[i].email
+                        td= accts[i].date
+
+    include modals/logout
+
+block scripts
+    script(src='/js/views/home.js')
+    script(src='/js/controllers/homeController.js')
+    script(src='/js/form-validators/accountValidator.js')
