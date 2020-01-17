@@ -197,4 +197,16 @@ $(function()
 
 });
 
+jQuery('#btn_edit_mode').on('click', function() {
+	var i = 0;
+	var b = !$('#my_nanogallery2').nanogallery2('option', 'thumbnailSelectable');
+	$('#my_nanogallery2').nanogallery2('option', 'thumbnailSelectable', b);
+	if($('#my_nanogallery2').nanogallery2('option', 'thumbnailSelectable') == true)
+	{
+		$(".editContainer").show();
+	}
+	else
+		$(".editContainer").hide();
+});
+
 

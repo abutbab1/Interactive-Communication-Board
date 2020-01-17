@@ -61,6 +61,12 @@ AccountValidator.prototype.showInvalidEmail = function()
 	this.showErrors(['That email address is already in use.']);
 }
 
+AccountValidator.prototype.showInvalidTitle = function(msg)
+{
+	this.controlGroups[1].addClass('error');
+	this.showErrors([msg]);
+}
+
 AccountValidator.prototype.showInvalidUserName = function()
 {
 	this.controlGroups[2].addClass('error');

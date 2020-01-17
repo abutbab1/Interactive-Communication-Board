@@ -1,0 +1,63 @@
+extends layout
+
+block content
+    - user = typeof(udata) != 'undefined' ? udata : { }
+    input(type='hidden', value= user._id)#userId
+    head
+    meta(name='viewport' content='user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1')
+    script(src='https://kit.fontawesome.com/a076d05399.js')
+    link(rel='stylesheet' href='https://www.w3schools.com/w3css/4/w3.css')
+    link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
+    link(href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet')
+    link(rel='stylesheet' type='text/css' href='https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
+
+    nav
+        a#resp-menu.responsive-menu(href='#')
+            i.fa.fa-reorder
+            |  Menu
+        ul.menu
+            li
+                a.homer(href='/home')
+                    i.fa.fa-home
+                    |  HOME
+            if(user.classf == "Speech Therapist")
+                li
+                    a(href='/users')
+                        i.fa.fa-users
+                        |  Users
+                    ul.sub-menu
+                        li
+                            a(href='/addsubuser')
+                                i.fa.fa-user-plus
+                                |  Add user
+            li
+                a(href='/addphrase')
+                    i.far.fa-plus-square
+                    |  Add Phrase
+            li
+                a(href='/addcategory')
+                    i.fa.fa-sitemap
+                    |  Add Category
+            div.right-items
+                li
+                    a(href='#')=user.name
+                    ul.sub-menu
+                        li
+                            a(href='/edituser')
+                                i.far.fa-address-card
+                                |  Edit User
+                        li
+                            a(href='#')#btn-logout
+                                i.fa.fa-sign-out
+                                |  Logout
+
+
+    include account
+    include modals/logout
+    include modals/alert
+    include modals/confirm
+
+block scripts
+    script(src='/js/views/home.js')
+    script(src='/js/controllers/homeController.js')
+    script(src='/js/form-validators/accountValidator.js')
