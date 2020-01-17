@@ -25,7 +25,7 @@ block content
                     |  HOME
             if(user.classf == "Speech Therapist")
                 li
-                    a(href='#')
+                    a(href='/users')
                         i.fa.fa-users
                         |  Users
                     ul.sub-menu
@@ -34,9 +34,9 @@ block content
                                 i.fa.fa-user-plus
                                 |  Add user
             li
-                a(href='/addtile')
+                a(href='/addphrase')
                     i.far.fa-plus-square
-                    |  Add Tile
+                    |  Add Phrase
             li
                 a(href='/addcategory')
                     i.fa.fa-sitemap
@@ -53,29 +53,51 @@ block content
                             a(href='#')#btn-logout
                                 i.fa.fa-sign-out
                                 |  Logout
+    - var mycompanions = [];
+    - for (var i = 0; i < accts.length; i++)
+        - if(accts[i].SpeechTherapist == user._id)
+            - mycompanions.push(accts[i])
 
-    div.container(style='margin:20px auto')
-        table.table.table-bordered.table-striped
-            thead.thead-dark
-                tr
-                    th(style='width:50px;text-align:center') #
-                    th(style='width:220px') Name
-                    th(style='width:220px') Username
-                    th(style='width:240px') Email
-                    th Account Created
-            tbody
-            - for (var i = 0, j=0; i < accts.length; i++)
-                tr
-                    if(accts[i].SpeechTherapist == user._id)
-                        td(style='text-align:center')= j = j + 1
-                        td= accts[i].name
-                        td= accts[i].user
-                        td= accts[i].email
-                        td= accts[i].date
+    #account-form-container.center-vertical
+        form.card.card-body.bg-light(method='post')#account-form
+            h2
+            h6#sub
+            hr
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm Connect to:
+                .col-sm-10
+                    select.custom-select(name='myCompanions')
+                        - var i = 0
+                        each item in mycompanions
+                            - i=i+1
+                            option(value=item.user)= i + ") " + "Name: " + item.name
+            table(style="width: 100%").table.table-bordered
+                thead
+                    tr
+                        th #
+                        th Name
+                        th Username
+                        th Email
+                        th Account Created
+                tbody
+                - for (var i = 0; i < mycompanions.length; i++)
+                    tr
+                        td(style='text-align:center')=i+1
+                        td= mycompanions[i].name
+                        td= mycompanions[i].user
+                        td= mycompanions[i].email
+                        td= mycompanions[i].date
+            hr
+            .form-buttons
+                button(type='button')#account-form-btn1.btn.btn-outline-dark
+                button(type='submit')#account-form-btn2.btn.btn-primary
 
+    include modals/form-errors
+    include modals/alert
     include modals/logout
 
+
 block scripts
-    script(src='/js/views/home.js')
+    script(src='/js/views/users.js')
     script(src='/js/controllers/homeController.js')
     script(src='/js/form-validators/accountValidator.js')

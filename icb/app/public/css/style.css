@@ -112,13 +112,13 @@ n
 	modal windows
 */
 .modal .modal-dialog {
-  width: 480px;
+  width: 1000px;
 }
 .modal .form-group {
   margin-bottom: 0px;
 }
 .modal .alert {
-  width: 480px;
+  width: 1000px;
   margin-top: 10px;
   margin-bottom: 0;
   padding: 8px 15px 8px 15px;
@@ -132,7 +132,7 @@ n
   padding: 0;
 }
 .modal .modal-footer button {
-  width: 250px;
+  width: 100%;
 }
 .editContainer {
   display: none;
