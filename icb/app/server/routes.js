@@ -6,6 +6,7 @@ module.exports = function(app) {
 	const multer = require('multer');
 	const upload = multer();
 	const fs = require('fs');
+
 /*
 	login & logout
 */
@@ -74,6 +75,11 @@ module.exports = function(app) {
 		}
 	});
 
+	app.post('/home', function(req, res){
+		req.session.tile = req.body.tileid;
+		res.status(200).send('ok');
+	});
+
 /*
 	new accounts
 */
@@ -135,15 +141,48 @@ module.exports = function(app) {
 		}
 	});
 
-	app.post('/addphrase', function(req, res){
+	app.get('/edittile', function(req, res) {
 		if (req.session.user == null){
 			res.redirect('/');
 		}	else{
-			console.log(req.body.file);
+			AM.getAllCategories(function(e, categ) {
+				AM.getAllPhrases(function (e, phras) {
+					res.render('edittile', {
+						title: 'Edit tile',
+						udata: req.session.user,
+						categories: categ,
+						phrases: phras,
+						tile: req.session.tile
+					});
+				})
+			})
+		}
+	});
+
+	app.post('/edittile',upload.any(), function(req, res){
+		if (req.session.user == null){
+			res.redirect('/');
+		}	else{
+			AM.editTile(req.session.user._id, req.body['title'], req.body['sound'][1], req.files, req.session.tile, function(e, o){
+				if (e){
+					res.status(400).send(e);
+				}	else{
+					req.session.user = o;
+					res.status(200).send('ok');
+				}
+			});
+		}
+	});
+
+	app.post('/addphrase',upload.any(), function(req, res){
+		if (req.session.user == null){
+			res.redirect('/');
+		}	else{
 				AM.addNewPharse(req.session.user._id,{
 				title 	: req.body['title'],
 				albumID 	: req.body['albumID'],
-			}, function(e, o){
+				sound		: req.body['sound'][1],
+			},req.files, function(e, o){
 				if (e){
 					res.status(400).send(e);
 				}	else{
@@ -160,19 +199,19 @@ module.exports = function(app) {
 		}	else{
 			res.render('addcategory', {
 				title : 'Create Category',
-				classification : CF,
 				udata : req.session.user,
 			});
 		}
 	});
 
-	app.post('/addcategory', function(req, res){
+	app.post('/addcategory',upload.any(), function(req, res){
 		if (req.session.user == null){
 			res.redirect('/');
 		}	else{
 			AM.addNewCategory(req.session.user._id,{
 				title 	: req.body['title'],
-			}, function(e, o){
+				sound		: req.body['sound'][1],
+			},req.files, function(e, o){
 				if (e){
 					res.status(400).send(e);
 				}	else{
@@ -310,27 +349,4 @@ module.exports = function(app) {
 	});
 
 	app.get('*', function(req, res) { res.render('404', { title: 'Page Not Found'}); });
-
-
-	app.post('/uploadsound', function (req, res, next) {
-		// console.log(req.file); // see what got uploaded
-		console.log("here")
-		let uploadLocation = __dirname + '/public/uploads/' + req.file.filename; // where to save the file to. make sure the incoming name has a .wav extension
-
-		fs.writeFileSync(uploadLocation, Buffer.from(new Uint8Array(req.file.buffer))); // write the blob to the server as a file
-		res.status(200).send('ok'); //send back that everything went ok
-
-	})
-
-	app.post('/uploadimage', upload.any(), (req, res) => {
-		console.log(req.files);
-		fs.writeFile("./app/public/users/"+req.files[0].originalname, req.files[0].buffer, (err) => {
-			if (err) {
-				console.log('Error: ', err);
-				res.status(500).send('An error occurred: ' + err.message);
-			} else {
-				res.status(200).send('ok');
-			}
-		});
-	});
 };
