@@ -1,0 +1,110 @@
+extends layout
+
+block content
+
+    // preset form values if we receive a userdata object //
+    - user = typeof(udata) != 'undefined' ? udata : { }
+    // store the userId on the client side in a hidden input field //
+    input(type='hidden', value= user._id)#userId
+    meta(name='viewport' content='user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1')
+    script(src='https://kit.fontawesome.com/a076d05399.js')
+    link(rel='stylesheet' href='https://www.w3schools.com/w3css/4/w3.css')
+    link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
+    link(href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet')
+    link(rel='stylesheet' type='text/css' href='https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
+
+    nav
+        a#resp-menu.responsive-menu(href='#')
+            i.fa.fa-reorder
+            |  Menu
+        ul.menu
+            li
+                a.homer(href='/home')
+                    i.fa.fa-home
+                    |  HOME
+            if(user.classf == "Speech Therapist")
+                li
+                    a(href='/users')
+                        i.fa.fa-users
+                        |  Users
+                    ul.sub-menu
+                        li
+                            a(href='/addsubuser')
+                                i.fa.fa-user-plus
+                                |  Add user
+            li
+                a(href='/addphrase')
+                    i.far.fa-plus-square
+                    |  Add Phrase
+            li
+                a(href='/addcategory')
+                    i.fa.fa-sitemap
+                    |  Add Category
+            div.right-items
+                li
+                    a(href='#')=user.name
+                    ul.sub-menu
+                        li
+                            a(href='/edituser')
+                                i.far.fa-address-card
+                                |  Edit User
+                        li
+                            a(href='#')#btn-logout
+                                i.fa.fa-sign-out
+                                |  Logout
+
+    #account-form-container.center-vertical
+        form.card.card-body.bg-light(method='post')#account-form
+            h2
+            h6#sub
+            hr
+
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm Full Name
+                .col-sm-10
+                    input.form-control#name-tf(type='text', name='name', value= "")
+
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm E-mail
+                .col-sm-10
+                    input.form-control#email-tf(type='email', name='email', value= "")
+
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm Classification
+                .col-sm-10
+                    select.custom-select#class-list(name='classf')
+                        each item in classification
+                            option(selected=item.name == "Companion")= item.name
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm Username
+                .col-sm-10
+                    input.form-control#user-tf(type='text', name='user', value= "").disabled
+
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm Password
+                .col-sm-10
+                    input.form-control#pass-tf(type='password', name='pass', value='')
+
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm Confirm Password
+                .col-sm-10
+                    input.form-control#pass-cn(type='password', name='passcn', value='')
+
+
+            hr
+            .form-buttons
+                button(type='button')#account-form-btn1.btn.btn-outline-dark
+                button(type='submit')#account-form-btn2.btn.btn-primary
+
+
+    // display form errors in a custom modal window //
+
+    include modals/form-errors
+    include modals/alert
+    include modals/logout
+    include modals/confirm
+
+block scripts
+    script(src='/js/views/addsubuser.js')
+    script(src='/js/controllers/signupController.js')
+    script(src='/js/form-validators/accountValidator.js')
