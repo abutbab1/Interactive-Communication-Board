@@ -1,4 +1,9 @@
 
+var BASE64_MARKER = ';base64,';
+var bootstrapButton = $.fn.button.noConflict(); // return $.fn.button to previously assigned value
+$.fn.bootstrapBtn = bootstrapButton;
+$.fn.tooltip.Constructor.VERSION;
+
 $(document).ready(function(){
 	var hc = new HomeController();
 	var av = new AccountValidator();
@@ -54,7 +59,7 @@ $(document).ready(function(){
 
 // setup the confirm window that displays when the user chooses to delete their account //
 
-	$('.modal-confirm').modal({ show : false, keyboard : true, backdrop : true });
+	$('.modal-confirm').modal({ show : false, keyboard : true, backdrop : true});
 	$('.modal-confirm .modal-header h4').text('Delete Account');
 	$('.modal-confirm .modal-body p').html('Are you sure you want to delete your account?');
 	$('.modal-confirm .cancel').html('Cancel');
@@ -79,9 +84,22 @@ $(document).ready(function(){
 	$('.modal-logout .submit').html('Yes');
 	$('.modal-logout .submit').addClass('btn-danger');
 
+
 });
 
-function myTnTool( action, item ) {										// custom button switch
+jQuery('#btn_edit_mode').on('click', function() {
+	var i = 0;
+	var b = !$('#my_nanogallery2').nanogallery2('option', 'thumbnailSelectable');
+	$('#my_nanogallery2').nanogallery2('option', 'thumbnailSelectable', b);
+	if($('#my_nanogallery2').nanogallery2('option', 'thumbnailSelectable') == true)
+	{
+		$(".editContainer").show();
+	}
+	else
+		$(".editContainer").hide();
+});
+
+function myTnTool( action, item ) {// custom button switch
 	console.dir(item);
 	switch( action ) {
 		case 'custom1':
@@ -90,24 +108,43 @@ function myTnTool( action, item ) {										// custom button switch
 	}
 }
 
-async function SoundCustom(item){
-	var text = item.title;
-	if('speechSynthesis' in window) { 											// Chrome only
-		var speech = new SpeechSynthesisUtterance( text );
-		speech.lang = 'en-US';
-		window.speechSynthesis.speak(speech);
+function SoundCustom(item){
+	if(item.customData)
+	{
+		var data = "data:audio/ogg;base64," + item.customData.sound;
+		var base64Index = data.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+		var base64 = data.substring(base64Index);
+		var raw = window.atob(base64);
+		var rawLength = raw.length;
+		var array = new Uint8Array(new ArrayBuffer(rawLength));
+		for(var i = 0; i < rawLength; i++) {
+			array[i] = raw.charCodeAt(i);
+		}
+		var blob=new Blob([array], {type : 'audio/ogg'});
+		var blobUrl = URL.createObjectURL(blob);
+		var audio = new Audio(blobUrl);
+		audio.play();
 	}
 	else
 	{
-		text = encodeURIComponent(text);
-		var audio = new Audio('https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q='+text);
-		audio.type = 'audio/mpeg';
+		var text = item.title;
+		if('speechSynthesis' in window) { 											// Chrome only
+			var speech = new SpeechSynthesisUtterance( text );
+			speech.lang = 'en-US';
+			window.speechSynthesis.speak(speech);
+		}
+		else
+		{
+			text = encodeURIComponent(text);
+			var audio = new Audio('https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q='+text);
+			audio.type = 'audio/mpeg';
 
-		try {
-			await audio.play();
-			console.log('Playing...');
-		} catch (err) {
-			console.log('Failed to play...' + error);
+			try {
+				audio.play();
+				console.log('Playing...');
+			} catch (err) {
+				console.log('Failed to play...' + error);
+			}
 		}
 	}
 }
@@ -195,18 +232,6 @@ $(function()
 		}
 	});
 
-});
-
-jQuery('#btn_edit_mode').on('click', function() {
-	var i = 0;
-	var b = !$('#my_nanogallery2').nanogallery2('option', 'thumbnailSelectable');
-	$('#my_nanogallery2').nanogallery2('option', 'thumbnailSelectable', b);
-	if($('#my_nanogallery2').nanogallery2('option', 'thumbnailSelectable') == true)
-	{
-		$(".editContainer").show();
-	}
-	else
-		$(".editContainer").hide();
 });
 
 
