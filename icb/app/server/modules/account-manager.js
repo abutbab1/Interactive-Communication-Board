@@ -1,8 +1,6 @@
 
 const crypto 		= require('crypto');
 const moment 		= require('moment');
-const multer 		= require('multer');
-const upload 		= multer();
 const fs 			= require('fs');
 const MongoClient 	= require('mongodb').MongoClient;
 
@@ -204,12 +202,15 @@ exports.manualLogin = function(user, pass, callback)
 {
 	accounts.findOne({user:user}, function(e, o) {
 		if (o == null){
+			console.log(user + " Not found in the data base!");
 			callback('user-not-found');
 		}	else{
 			validatePassword(pass, o.pass, function(err, res) {
 				if (res){
+					console.log("Connecting to: "+ user);
 					callback(null, o);
 				}	else{
+					console.log(user + " found but the password does not match!");
 					callback('invalid-password');
 				}
 			});
@@ -263,18 +264,21 @@ exports.addNewAccount = function(newData, callback)
 {
 	accounts.findOne({user:newData.user}, function(e, o) {
 		if (o){
+			console.log(newData.user + " is taken!");
 			callback('username-taken');
 		}	else{
 			accounts.findOne({email:newData.email}, function(e, o) {
 				if (o){
+					console.log(newData.email + " is taken!");
 					callback('email-taken');
 				}	else{
 					saltAndHash(newData.pass, function(hash){
 						newData.pass = hash;
 					// append date stamp when record was created //
-						newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
+						newData.date = moment().format('DD/MM/YY, HH:mm:ss');
+						console.log(newData.user + " has been created in database!");
 						accounts.insertOne(newData, callback);
-						fs.mkdirSync("./app/public/users/"+newData.user,{recursive: true},  function (err){if(err) console.log('error', err);});
+						fs.mkdir("./app/public/users/"+newData.user,{recursive: true},  function (err){if(err) console.log('error', err);});
 					});
 				}
 			});
@@ -286,11 +290,12 @@ exports.addNewCategory = function(userid,newData,files, callback)
 {
 	if(newData.title == "")
 	{
+		console.log("Can't submit empty title!");
 		callback('title-empty');
 	}
 	else
 	{
-		if(files[0].originalname == undefined)
+		if(files == undefined || files[0] == undefined)
 		{
 			accounts.findOne({_id:getObjectId(userid)}, function(e, o) {
 				phrases.find().sort( [[ '_id', -1 ]] ).limit(1).toArray( (err, maxphr) =>
@@ -306,8 +311,17 @@ exports.addNewCategory = function(userid,newData,files, callback)
 						{
 							id = maxcat[0]._id + 1;
 						}
-						o.Categories.push({id: id});
-						categories.insertOne({_id: id, title: newData.title, srct: "base-icb/ICB.jpg"});
+						if(newData.sound == '' || newData.sound == undefined)
+						{
+							o.Categories.push({id: id});
+							categories.insertOne({_id: id, title: newData.title, srct: "base-icb/ICB.jpg"});
+						}
+						else
+						{
+							o.Categories.push({id: id, sound: newData.sound});
+							categories.insertOne({_id: id, title: newData.title, srct: "base-icb/ICB.jpg"});
+						}
+						console.log(newData.title + " has been created in database!");
 						accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
 					});
 				});
@@ -329,15 +343,19 @@ exports.addNewCategory = function(userid,newData,files, callback)
 						{
 							id = maxcat[0]._id + 1;
 						}
-						fs.writeFile("./app/public/users/"+o.user+"/"+newData.title+id+".jpg", files[0].buffer, (err) => {
-							if (err) {
-								callback(err.message);
-							} else {
-								o.Categories.push({id: id});
-								categories.insertOne({_id: id, title: newData.title, srct: o.user+"/"+newData.title+id+".jpg"});
-								accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
-							}
-						});
+						fs.writeFile("./app/public/users/"+o.user+"/"+newData.title+id+".jpg", files[0].buffer, (err) => {});
+						if(newData.sound == '' || newData.sound == undefined)
+						{
+							o.Categories.push({id: id});
+							categories.insertOne({_id: id, title: newData.title, srct: o.user+"/"+newData.title+id+".jpg"});
+						}
+						else
+						{
+							o.Categories.push({id: id, sound: newData.sound});
+							categories.insertOne({_id: id, title: newData.title, srct: o.user+"/"+newData.title+id+".jpg"});
+						}
+						console.log(newData.title + " has been created in database!");
+						accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
 					});
 				});
 			});
@@ -345,15 +363,16 @@ exports.addNewCategory = function(userid,newData,files, callback)
 	}
 };
 
-exports.addNewPharse = function(userid,newData, callback)
+exports.addNewPharse = function(userid,newData, files, callback)
 {
 	if(newData.title == "")
 	{
+		console.log("Can't submit empty title!");
 		callback('title-empty');
 	}
 	else
 	{
-		if(files == undefined)
+		if(files == undefined || files[0] == undefined)
 		{
 			accounts.findOne({_id:getObjectId(userid)}, function(e, o) {
 				phrases.find().sort( [[ '_id', -1 ]] ).limit(1).toArray( (err, maxphr) =>
@@ -369,15 +388,33 @@ exports.addNewPharse = function(userid,newData, callback)
 						{
 							id = maxcat[0]._id + 1;
 						}
-						o.Phrases.push({id: id});
 						if(newData.albumID == '')
 						{
-							phrases.insertOne({_id: id, title: newData.title, srct: "base-icb/ICB.jpg"});
+							if(newData.sound == '' || newData.sound == undefined)
+							{
+								o.Phrases.push({id: id});
+								phrases.insertOne({_id: id, title: newData.title, srct: "base-icb/ICB.jpg"});
+							}
+							else
+							{
+								o.Phrases.push({id: id, sound: newData.sound});
+								phrases.insertOne({_id: id, title: newData.title, srct: "base-icb/ICB.jpg"});
+							}
 						}
 						else
 						{
-							phrases.insertOne({_id: id, title: newData.title, srct: "base-icb/ICB.jpg" , albumID: newData.albumID});
+							if(newData.sound == '' || newData.sound == undefined)
+							{
+								o.Phrases.push({id: id});
+								phrases.insertOne({_id: id, title: newData.title, srct: "base-icb/ICB.jpg" , albumID: newData.albumID});
+							}
+							else
+							{
+								o.Phrases.push({id: id, sound: newData.sound});
+								phrases.insertOne({_id: id, title: newData.title, srct: "base-icb/ICB.jpg", albumID: newData.albumID});
+							}
 						}
+						console.log(newData.title + " has been created in database!");
 						accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
 					});
 				});
@@ -399,22 +436,35 @@ exports.addNewPharse = function(userid,newData, callback)
 						{
 							id = maxcat[0]._id + 1;
 						}
-						fs.writeFile("./app/public/users/"+o.user+"/"+newData.title+id+".jpg", files[0].buffer, (err) => {
-							if (err) {
-								callback(err.message);
-							} else {
+						fs.writeFile("./app/public/users/"+o.user+"/"+newData.title+id+".jpg", files[0].buffer, (err) => {});
+						if(newData.albumID == '')
+						{
+							if(newData.sound == '' || newData.sound == undefined)
+							{
 								o.Phrases.push({id: id});
-								if(newData.albumID == '')
-								{
-									phrases.insertOne({_id: id, title: newData.title, srct: o.user+"/"+newData.title+id+".jpg"});
-								}
-								else
-								{
-									phrases.insertOne({_id: id, title: newData.title, srct: o.user+"/"+newData.title+id+".jpg" , albumID: newData.albumID});
-								}
-								accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
+								phrases.insertOne({_id: id, title: newData.title, srct: o.user+"/"+newData.title+id+".jpg"});
 							}
-						});
+							else
+							{
+								o.Phrases.push({id: id, sound: newData.sound});
+								phrases.insertOne({_id: id, title: newData.title, srct: o.user+"/"+newData.title+id+".jpg"});
+							}
+						}
+						else
+						{
+							if(newData.sound == '' || newData.sound == undefined)
+							{
+								o.Phrases.push({id: id});
+								phrases.insertOne({_id: id, title: newData.title, srct: o.user+"/"+newData.title+id+".jpg" , albumID: newData.albumID});
+							}
+							else
+							{
+								o.Phrases.push({id: id, sound: newData.sound});
+								phrases.insertOne({_id: id, title: newData.title, srct: o.user+"/"+newData.title+id+".jpg" , albumID: newData.albumID});
+							}
+						}
+						console.log(newData.title + " has been created in database!");
+						accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
 					});
 				});
 			});
@@ -426,9 +476,10 @@ exports.ConnectToCompanion = function(compuser,callback)
 {
 	accounts.findOne({user:compuser}, function(e, o) {
 		if (o) {
-			console.log(o);
+			console.log("Connecting to sub user: "+ compuser);
 			callback(null, o);
 		}
+		console.log(compuser + " Not found in the data base!");
 	});
 };
 
@@ -436,25 +487,30 @@ exports.updateAccount = function(id,newData, callback)
 {
 	accounts.findOne({email:newData.email}, function(e, o) {
 		if (o && o._id != id) {
+			console.log(newData.email + " is taken!");
 			callback('email-taken');
 		}
 		else
 		{
-			if(newData.pass != "")
-			{
-				saltAndHash(newData.pass, function(hash){
-					o.pass = hash;
+			accounts.findOne({_id:getObjectId(id)}, function(e, o) {
+				if(newData.pass != "")
+				{
+					saltAndHash(newData.pass, function(hash){
+						o.pass = hash;
+						o.name = newData.name;
+						o.email = newData.email;
+						console.log(o.user + " has been updated!");
+						accounts.findOneAndUpdate({_id:getObjectId(id)}, {$set:o}, {returnOriginal : false}, callback(null,o));
+					});
+				}
+				else
+				{
 					o.name = newData.name;
 					o.email = newData.email;
-					accounts.findOneAndUpdate({_id:getObjectId(id)}, {$set:o}, {returnOriginal : false}, callback(null,o));
-				});
-			}
-			else
-			{
-				o.name = newData.name;
-				o.email = newData.email;
-				accounts.findOneAndUpdate({_id: getObjectId(id)}, {$set: o}, {returnOriginal: false}, callback(null, o));
-			}
+					console.log(o.user + " has been updated!");
+					accounts.findOneAndUpdate({_id: getObjectId(id)}, {$set: o}, {returnOriginal: false}, callback(null, o));
+				}
+			});
 		}
 	});
 }
@@ -500,6 +556,7 @@ exports.getAllPhrases = function(callback)
 
 exports.deleteAccount = function(id, callback)
 {
+	console.log("The user has been deleted!");
 	accounts.deleteOne({_id: getObjectId(id)}, callback);
 }
 
@@ -508,7 +565,10 @@ exports.deleteTile = function(id, tileid, callback)
 	var found = false;
 	accounts.findOne({_id:getObjectId(id)}, function(e, o) {
 		if (e)
+		{
+			console.log("Cannot find user!");
 			callback(e);
+		}
 		else
 		{
 			categories.find().toArray(function(err, catarray)
@@ -553,29 +613,176 @@ exports.deleteTile = function(id, tileid, callback)
 				}
 				if(allalbums.length > 0)
 					phrases.find({$or : allalbums}).toArray(function(err, phraarray) {
-						if (phraarray.length > 0) {
-							for (var j = 0; j < phraarray.length; j++) {
-								for (var z = 0; z < o.Phrases.length; z++) {
-									if (o.Phrases[z].id == phraarray[j]._id) {
-										o.Phrases.splice(z, 1);
-										break;
-									}
+						for (var j = 0; j < phraarray.length; j++) {
+							for (var z = 0; z < o.Phrases.length; z++) {
+								if (o.Phrases[z].id == phraarray[j]._id) {
+									o.Phrases.splice(z, 1);
+									break;
 								}
 							}
-							accounts.findOneAndUpdate({_id: getObjectId(id)}, {$set: o}, {returnOriginal: false}, callback(null, o));
 						}
+						console.log("tiles has been deleted!");
+						accounts.findOneAndUpdate({_id: getObjectId(id)}, {$set: o}, {returnOriginal: false}, callback(null, o));
 					});
 				else
+				{
+					console.log("tiles has been deleted!");
 					accounts.findOneAndUpdate({_id: getObjectId(id)}, {$set: o}, {returnOriginal: false}, callback(null, o));
+				}
 			});
 		}
 	});
 }
 
-exports.deleteAllAccounts = function(callback)
+exports.editTile = function(userid, newtitle, newsound,  newimage, tileid, callback)
+{
+	var found = false;
+	accounts.findOne({_id:getObjectId(userid)}, function(e, o) {
+		if (e)
+		{
+			console.log("Cannot find user!");
+			callback(e);
+		}
+		else
+		{
+			for(var i=0; i<o.Phrases.length && !found; i++)					// searching in phrases
+			{
+				if(o.Phrases[i].id == Number(tileid))
+				{
+					found = true;
+					if(newimage == undefined || newimage[0] == undefined)
+					{
+						if(newsound == undefined || newsound == '')
+						{
+							if(o.Phrases[i].sound != undefined && o.Phrases[i].srct != undefined)
+							{
+								o.Phrases[i] = {id: Number(tileid), title: newtitle, srct: o.Phrases[i].srct, sound: o.Phrases[i].sound}
+							}
+							else if(o.Phrases[i].sound != undefined)
+							{
+								o.Phrases[i] = {id: Number(tileid), title: newtitle, sound: o.Phrases[i].sound};
+							}
+							else if (o.Phrases[i].srct != undefined)
+							{
+								o.Phrases[i] = {id: Number(tileid), title: newtitle, srct: o.Phrases[i].srct};
+							}
+							else
+							{
+								o.Phrases[i] = {id: Number(tileid), title: newtitle};
+							}
+							console.log("Tile has been edited!");
+							accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
+						}
+						else
+						{
+							if(o.Phrases[i].srct != undefined)
+							{
+								o.Phrases[i] = {id: Number(tileid), title: newtitle, srct: o.Phrases[i].srct, sound: newsound};
+							}
+							else
+							{
+								o.Phrases[i] = {id: Number(tileid), title: newtitle, sound: newsound};
+							}
+							console.log("Tile has been edited!");
+							accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
+						}
+					}
+					else
+					{
+						fs.writeFile("./app/public/users/"+o.user+"/"+newtitle+tileid+".jpg", newimage[0].buffer, (err) => {});
+						if(newsound == undefined || newsound == '')
+						{
+							if(o.Phrases[i].sound != undefined)
+							{
+								o.Phrases[i] = {id: Number(tileid), title: newtitle, srct: o.user+"/"+newtitle+tileid+".jpg", sound: o.Phrases[i].sound};
+							}
+							else
+							{
+								o.Phrases[i] = {id: Number(tileid), title: newtitle, srct: o.user+"/"+newtitle+tileid+".jpg" };
+							}
+						}
+						else
+						{
+							o.Phrases[i] = {id: Number(tileid), title: newtitle, srct: o.user+"/"+newtitle+tileid+".jpg", sound: newsound};
+						}
+						console.log("Tile has been edited!");
+						accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
+					}
+				}
+			}
+			for(var i=0; i<o.Categories.length && !found; i++)
+			{
+				if(o.Categories[i].id == Number(tileid))
+				{
+					found = true;
+					if(newimage == undefined || newimage[0] == undefined)
+					{
+						if(newsound == undefined || newsound == '')
+						{
+							if(o.Categories[i].sound != undefined && o.Categories[i].srct != undefined)
+							{
+								o.Categories[i] = {id: Number(tileid), title: newtitle, srct: o.Categories[i].srct, sound: o.Categories[i].sound}
+							}
+							else if(o.Categories[i].sound != undefined)
+							{
+								o.Categories[i] = {id: Number(tileid), title: newtitle, sound: o.Categories[i].sound};
+							}
+							else if (o.Categories[i].srct != undefined)
+							{
+								o.Categories[i] = {id: Number(tileid), title: newtitle, srct: o.Categories[i].srct};
+							}
+							else
+							{
+								o.Categories[i] = {id: Number(tileid), title: newtitle};
+							}
+							console.log("Tile has been edited!");
+							accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
+						}
+						else
+						{
+							if(o.Categories[i].srct != undefined)
+							{
+								o.Categories[i] = {id: Number(tileid), title: newtitle, srct: o.Categories[i].srct, sound: newsound};
+							}
+							else
+							{
+								o.Categories[i] = {id: Number(tileid), title: newtitle, sound: newsound};
+							}
+							console.log("Tile has been edited!");
+							accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
+						}
+					}
+					else
+					{
+						fs.writeFile("./app/public/users/"+o.user+"/"+newtitle+tileid+".jpg", newimage[0].buffer, (err) => {});
+						if(newsound == undefined || newsound == '')
+						{
+							if(o.Categories[i].sound != undefined)
+							{
+								o.Categories[i] = {id: Number(tileid), title: newtitle, srct: o.user+"/"+newtitle+tileid+".jpg", sound: o.Categories[i].sound};
+							}
+							else
+							{
+								o.Categories[i] = {id: Number(tileid), title: newtitle, srct: o.user+"/"+newtitle+tileid+".jpg" };
+							}
+						}
+						else
+						{
+							o.Categories[i] = {id: Number(tileid), title: newtitle, srct: o.user+"/"+newtitle+tileid+".jpg", sound: newsound};
+						}
+						console.log("Tile has been edited!");
+						accounts.findOneAndUpdate({_id: getObjectId(userid)}, {$set: o}, {returnOriginal: false}, callback(null, o));
+					}
+				}
+			}
+		}
+	});
+};
+
+/*exports.deleteAllAccounts = function(callback)					// if we want to restart the database
 {
 	accounts.deleteMany({}, callback);
-}
+};*/
 
 /*
 	private encryption & validation methods
@@ -594,23 +801,23 @@ var generateSalt = function()
 
 var md5 = function(str) {
 	return crypto.createHash('md5').update(str).digest('hex');
-}
+};
 
 var saltAndHash = function(pass, callback)
 {
 	var salt = generateSalt();
 	callback(salt + md5(pass + salt));
-}
+};
 
 var validatePassword = function(plainPass, hashedPass, callback)
 {
 	var salt = hashedPass.substr(0, 10);
 	var validHash = salt + md5(plainPass + salt);
 	callback(null, hashedPass === validHash);
-}
+};
 
 var getObjectId = function(id)
 {
 	return new require('mongodb').ObjectID(id);
-}
+};
 
