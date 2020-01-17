@@ -1,0 +1,118 @@
+extends layout
+
+block content
+
+    // preset form values if we receive a userdata object //
+    - user = typeof(udata) != 'undefined' ? udata : { }
+    // store the userId on the client side in a hidden input field //
+    input(type='hidden', value= user._id)#userId
+    meta(name='viewport' content='user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1')
+    script(src='https://kit.fontawesome.com/a076d05399.js')
+    link(rel='stylesheet' href='https://www.w3schools.com/w3css/4/w3.css')
+    link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css')
+    link(href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet')
+    link(rel='stylesheet' type='text/css' href='https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css')
+    script(src="https://code.jquery.com/jquery-3.3.1.js")
+
+    - var categ = [];
+    - categ.push({name: "Main board", id: ""})
+    - for(var i=0;i<categories.length;i++)
+        - for(var j=0;j<user.Categories.length; j++)
+            - if(categories[i]._id == user.Categories[j].id)
+                - if(user.Categories[j].title != undefined)
+                    - categ.push({id: user.Categories[j].id, name: user.Categories[j].title})
+                - else
+                    - categ.push({id: user.Categories[j].id, name: categories[i].title})
+
+    nav
+        a#resp-menu.responsive-menu(href='#')
+            i.fa.fa-reorder
+            |  Menu
+        ul.menu
+            li
+                a.homer(href='/home')
+                    i.fa.fa-home
+                    |  HOME
+            if(user.classf == "Speech Therapist")
+                li
+                    a(href='/users')
+                        i.fa.fa-users
+                        |  Users
+                    ul.sub-menu
+                        li
+                            a(href='/addsubuser')
+                                i.fa.fa-user-plus
+                                |  Add user
+            li
+                a(href='/addphrase')
+                    i.far.fa-plus-square
+                    |  Add Phrase
+            li
+                a(href='/addcategory')
+                    i.fa.fa-sitemap
+                    |  Add Category
+            div.right-items
+                li
+                    a(href='#')=user.name
+                    ul.sub-menu
+                        li
+                            a(href='/edituser')
+                                i.far.fa-address-card
+                                |  Edit User
+                        li
+                            a(href='#')#btn-logout
+                                i.fa.fa-sign-out
+                                |  Logout
+
+    #account-form-container.center-vertical
+        form.card.card-body.bg-light(method='post')#account-form
+            h2
+            h6#sub
+            hr
+
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm Title
+                .col-sm-10
+                    input.form-control#title(type='text', name='title', value= "")
+
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm Category
+                .col-sm-10
+                    select.custom-select(name='albumID')
+                        each item in categ
+                            option(value=item.id)=item.name
+
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm Image
+                .col-sm-10
+                    input(type='file' name='file' accept='image/*')
+
+            .form-group.row
+                label.col-sm-2.col-form-label.col-form-label-sm Sound
+                .col-sm-10
+                    button(id="record")
+                        i(style="color:red").fas.fa-circle
+                        |  Start
+                    button(id="stop" disabled)
+                        i.fas.fa-stop
+                        |  Stop
+                    input(hidden id='sound' type='file' name='sound')
+                    button(id="play" disabled onclick="return false;")
+                        i(style="color:green").fas.fa-play
+                        |  Play
+
+            .form-buttons
+                button(type='button' )#account-form-btn1.btn.btn-outline-dark
+                button(type='submit')#account-form-btn2.btn.btn-primary
+
+
+    // display form errors in a custom modal window //
+
+    include modals/form-errors
+    include modals/alert
+    include modals/logout
+
+    block scripts
+        script(src='/js/views/addphrase.js')
+        script(src='/js/controllers/homeController.js')
+        script(src='/js/form-validators/accountValidator.js')
